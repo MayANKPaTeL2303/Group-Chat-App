@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.pdb
+*.egg-info/
+*.eggs
+*.log
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+
+# Django static/media files
+staticfiles/
+media/
+
+# SQLite database
+*.sqlite3
+
+# VSCode settings
+.vscode/
+
+# Mac system files
+.DS_Store
+
+# Windows system files
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Environment variables and secrets
+.env
+*.env
+
+# Tailwind or npm cache
+node_modules/
+*.lock
+
+# Channels/Daphne cache
+*.daphne.sock
+
+imp.txt
