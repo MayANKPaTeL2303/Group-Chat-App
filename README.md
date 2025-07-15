@@ -42,3 +42,7 @@ Make sure Redis is installed and running:
 - **Windows (using Docker):**
 ```bash
 docker run -p 6379:6379 redis
+
+```bash 
+daphne groupchat.asgi:application
+
