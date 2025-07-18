@@ -1,76 +1,88 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Room {{ room_code }}</title>
-    <link rel="stylesheet" href="{% static 'chat/css/chatroom.css' %}?v=2">
-  </head>
-  <body class="chat-body">
-    <div class="chat-container">
-      <h2 class="chat-header">
-        🚀 Group Chat - Room <span class="room-code">{{ room_code }}</span>
-      </h2>
+<head>
+  <meta charset="UTF-8" />
+  <title>Room {{ room_code }}</title>
+  <link rel="stylesheet" href="{% static 'chat/css/chatroom.css' %}?v=3">
+</head>
+<body>
 
-      <!-- Chat messages -->
+  <!-- Header -->
+   <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-logo">GroupChat</div>
+      <ul class="nav-links">
+        <li><a href="{% url 'home' %}">Home</a></li>
+        <li><a href="https://github.com/MayANKPaTeL2303">GitHub</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Main Chat Section -->
+  <main class="chat-main">
+    <div class="chat-container">
+      <h2 class="chat-header">🚀 Room <span class="room-code">{{ room_code }}</span></h2>
+
       <div id="chat-box" class="chat-box">
-        <!-- Messages appear here -->
+        <!-- Chat messages appear here -->
       </div>
 
-      <!-- Message input -->
       <div class="input-area">
         <input id="messageInput" type="text" placeholder="Type your message..." class="chat-input" />
         <button onclick="sendMessage()" class="send-button">Send</button>
       </div>
     </div>
+  </main>
 
-    <script>
-      const roomCode = "{{ room_code }}";
-      const username = "{{ username }}";
-      const wsUrl = "ws://" + window.location.host + "/ws/chat/" + roomCode + "/";
-      console.log("🔌 Connecting to WebSocket at:", wsUrl);
+  <!-- WebSocket Script -->
+  <script>
+    const roomCode = "{{ room_code }}";
+    const username = "{{ username }}";
+    const wsUrl = "ws://" + window.location.host + "/ws/chat/" + roomCode + "/";
+    const chatSocket = new WebSocket(wsUrl);
 
-      const chatSocket = new WebSocket(wsUrl);
+    chatSocket.onopen = () => console.log("✅ WebSocket connected!");
+    chatSocket.onerror = (e) => console.error("❌ WebSocket error:", e);
+    chatSocket.onclose = (e) => console.warn("⚠️ WebSocket closed:", e);
 
-      chatSocket.onopen = () => console.log("✅ WebSocket connected!");
-      chatSocket.onerror = (error) => console.error("❌ WebSocket error:", error);
-      chatSocket.onclose = (event) => console.warn("⚠️ WebSocket closed:", event);
+    chatSocket.onmessage = (e) => {
+      const data = JSON.parse(e.data);
+      const chatBox = document.getElementById("chat-box");
+      const timestamp = new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const isMine = data.username === username;
 
-      chatSocket.onmessage = (e) => {
-        const data = JSON.parse(e.data);
-        const chatBox = document.getElementById("chat-box");
+      const bubble = document.createElement("div");
+      bubble.className = `bubble-row ${isMine ? "right" : "left"}`;
 
-        const timestamp = new Date(data.timestamp).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        });
+      bubble.innerHTML = `
+        <div class="bubble ${isMine ? "mine" : "theirs"}">
+          <div class="username">${data.username}</div>
+          <div class="message">${data.message}</div>
+          <div class="timestamp">${timestamp}</div>
+        </div>
+      `;
 
-        const isMine = data.username === username;
+      chatBox.appendChild(bubble);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    };
 
-        const bubble = document.createElement("div");
-        bubble.className = `bubble-row ${isMine ? "right" : "left"}`;
-
-        bubble.innerHTML = `
-          <div class="bubble ${isMine ? "mine" : "theirs"}">
-            <div class="username">${data.username}</div>
-            <div class="message">${data.message}</div>
-            <div class="timestamp">${timestamp}</div>
-          </div>
-        `;
-
-        chatBox.appendChild(bubble);
-        chatBox.scrollTop = chatBox.scrollHeight;
-      };
-
-      function sendMessage() {
-        const input = document.getElementById("messageInput");
-        const message = input.value.trim();
-        if (message) {
-          console.log("📤 Sending message:", message);
-          chatSocket.send(JSON.stringify({ message, username }));
-          input.value = "";
-        }
+    function sendMessage() {
+      const input = document.getElementById("messageInput");
+      const message = input.value.trim();
+      if (message) {
+        chatSocket.send(JSON.stringify({ message, username }));
+        input.value = "";
       }
-    </script>
-  </body>
+    }
+  </script>
+
+
+<!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2025 GroupChat App | Built by Mayank Patel</p>
+  </footer>
+
+</body>
 </html>

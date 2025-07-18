@@ -9,6 +9,19 @@
   <link rel="stylesheet" href="{% static 'chat/css/home.css' %}?v=2">
 </head>
 <body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-logo">GroupChat</div>
+      <ul class="nav-links">
+        <li><a href="{% url 'home' %}">Home</a></li>
+        <li><a href="https://mayankpatel2303.github.io/">View My Site</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
   <div class="container">
 
     <!-- Main Heading -->
@@ -35,5 +48,11 @@
     </div>
 
   </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2025 GroupChat App | Built by Mayank Patel</p>
+  </footer>
+
 </body>
 </html>
