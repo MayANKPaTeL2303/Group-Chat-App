@@ -1,45 +1,39 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Group Chat</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            background: linear-gradient(to right, #4749c4, #8b5cf6);
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Group Chat</title>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{% static 'chat/css/home.css' %}">
 </head>
-<body class="min-h-screen flex items-center justify-center text-gray-800 font-sans">
-    <div class="bg-white/80 backdrop-blur-md p-8 rounded-xl shadow-2xl w-full max-w-md border border-white/20">
-        <h1 class="text-4xl font-extrabold text-center mb-6 text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
-            🚀 Group Chat
-        </h1>
+<body>
+  <div class="container">
 
-        <!-- Create Room -->
-        <div class="mb-6">
-            <h2 class="text-lg font-semibold mb-2 text-indigo-700">Create Room</h2>
-            <form method="get" action="{% url 'create_room' %}" class="space-y-3">
-                <input type="text" name="username" placeholder="Enter your name"
-                       class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400" required>
-                <button type="submit"
-                        class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition">Create</button>
-            </form>
-        </div>
+    <!-- Main Heading -->
+    <h1 class="heading">🚀 Group Chat</h1>
 
-        <!-- Join Room -->
-        <div>
-            <h2 class="text-lg font-semibold mb-2 text-green-700">Join Room</h2>
-            <form method="post" action="{% url 'join_room' %}" class="space-y-3">
-                {% csrf_token %}
-                <input type="text" name="room_code" placeholder="Room Code"
-                       class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-400" required>
-                <input type="text" name="username" placeholder="Enter your name"
-                       class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-400" required>
-                <button type="submit"
-                        class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition">Join</button>
-            </form>
-        </div>
+    <!-- Create Room -->
+    <div class="section-block">
+      <h2 class="section-title indigo">Create Room</h2>
+      <form method="get" action="{% url 'create_room' %}" class="form-block">
+        <input type="text" name="username" placeholder="Enter your name" required>
+        <button type="submit" class="create-btn">Create</button>
+      </form>
     </div>
+
+    <!-- Join Room -->
+    <div class="section-block">
+      <h2 class="section-title green">Join Room</h2>
+      <form method="post" action="{% url 'join_room' %}" class="form-block">
+        {% csrf_token %}
+        <input type="text" name="room_code" placeholder="Room Code" required>
+        <input type="text" name="username" placeholder="Enter your name" required>
+        <button type="submit" class="join-btn">Join</button>
+      </form>
+    </div>
+
+  </div>
 </body>
 </html>

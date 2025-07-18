@@ -1,26 +1,24 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Join Room</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{% static 'chat/css/join.css' %}">
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen font-sans">
-    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-        <h1 class="text-2xl font-bold text-center text-indigo-600 mb-4">Join a Room</h1>
+<body>
+    <div class="container">
+        <h1 class="heading">Join a Room</h1>
 
         {% if error %}
-        <div class="bg-red-100 text-red-700 px-4 py-2 rounded mb-4">{{ error }}</div>
+        <div class="alert">{{ error }}</div>
         {% endif %}
 
         <form method="post">
             {% csrf_token %}
-            <input type="text" name="room_code" placeholder="Room Code"
-                   class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-2" required>
-            <input type="text" name="username" placeholder="Your Name"
-                   class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-4" required>
-            <button type="submit"
-                    class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">Join Room</button>
+            <input type="text" name="room_code" placeholder="Room Code" required>
+            <input type="text" name="username" placeholder="Your Name" required>
+            <button type="submit">Join Room</button>
         </form>
     </div>
 </body>

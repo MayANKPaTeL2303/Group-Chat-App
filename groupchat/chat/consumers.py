@@ -1,5 +1,7 @@
+# Code for the wensocket consumer handling the real time communication in the chat rooms
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
+from datetime import datetime, timezone
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -29,11 +31,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'type': 'chat_message',
                 'message': message,
                 'username': username,
+                'timestamp': datetime.now(timezone.utc).isoformat()  
             }
         )
+
 
     async def chat_message(self, event):
         await self.send(text_data=json.dumps({
             'message': event['message'],
             'username': event['username'],
+            'timestamp': event['timestamp'], 
         }))
+

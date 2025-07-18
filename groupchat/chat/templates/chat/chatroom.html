@@ -1,72 +1,76 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Room {{ room_code }}</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center font-sans">
-  <div class="bg-white w-full max-w-3xl rounded-xl shadow-xl p-6 flex flex-col space-y-4">
-    <h2 class="text-2xl font-bold text-indigo-600 text-center">
-      🚀 Group Chat - Room <span class="text-gray-700">{{ room_code }}</span>
-    </h2>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Room {{ room_code }}</title>
+    <link rel="stylesheet" href="{% static 'chat/css/chatroom.css' %}">
+  </head>
+  <body class="chat-body">
+    <div class="chat-container">
+      <h2 class="chat-header">
+        🚀 Group Chat - Room <span class="room-code">{{ room_code }}</span>
+      </h2>
 
-    <!-- Chat messages -->
-    <div id="chat-box" class="flex-1 h-96 overflow-y-auto border rounded-lg p-4 space-y-2 bg-gray-50">
-      <!-- Messages appear here -->
+      <!-- Chat messages -->
+      <div id="chat-box" class="chat-box">
+        <!-- Messages appear here -->
+      </div>
+
+      <!-- Message input -->
+      <div class="input-area">
+        <input id="messageInput" type="text" placeholder="Type your message..." class="chat-input" />
+        <button onclick="sendMessage()" class="send-button">Send</button>
+      </div>
     </div>
 
-    <!-- Message input -->
-    <div class="flex space-x-2">
-      <input id="messageInput" type="text" placeholder="Type your message..."
-        class="flex-1 px-4 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400" />
-      <button onclick="sendMessage()"
-        class="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700">Send</button>
-    </div>
-  </div>
+    <script>
+      const roomCode = "{{ room_code }}";
+      const username = "{{ username }}";
+      const wsUrl = "ws://" + window.location.host + "/ws/chat/" + roomCode + "/";
+      console.log("🔌 Connecting to WebSocket at:", wsUrl);
 
-  <script>
-    const roomCode = "{{ room_code }}";
-    const username = "{{ username }}";
-    const wsUrl = 'ws://' + window.location.host + '/ws/chat/' + roomCode + '/';
-    console.log("🔌 Connecting to WebSocket at:", wsUrl);
+      const chatSocket = new WebSocket(wsUrl);
 
-    const chatSocket = new WebSocket(wsUrl);
+      chatSocket.onopen = () => console.log("✅ WebSocket connected!");
+      chatSocket.onerror = (error) => console.error("❌ WebSocket error:", error);
+      chatSocket.onclose = (event) => console.warn("⚠️ WebSocket closed:", event);
 
-    chatSocket.onopen = () => console.log("✅ WebSocket connected!");
-    chatSocket.onerror = (error) => console.error("❌ WebSocket error:", error);
-    chatSocket.onclose = (event) => console.warn("⚠️ WebSocket closed:", event);
+      chatSocket.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        const chatBox = document.getElementById("chat-box");
 
-    chatSocket.onmessage = (e) => {
-      const data = JSON.parse(e.data);
-      const chatBox = document.getElementById('chat-box');
+        const timestamp = new Date(data.timestamp).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
 
-      const isMine = data.username === username;
+        const isMine = data.username === username;
 
-      const bubble = document.createElement('div');
-      bubble.className = `flex ${isMine ? 'justify-end' : 'justify-start'}`;
+        const bubble = document.createElement("div");
+        bubble.className = `bubble-row ${isMine ? "right" : "left"}`;
 
-      bubble.innerHTML = `
-        <div class="max-w-xs px-4 py-2 rounded-lg shadow 
-          ${isMine ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-800'}">
-          <div class="text-xs font-semibold ${isMine ? 'text-white/70' : 'text-gray-500'} mb-1">${data.username}</div>
-          <div class="text-sm">${data.message}</div>
-        </div>
-      `;
+        bubble.innerHTML = `
+          <div class="bubble ${isMine ? "mine" : "theirs"}">
+            <div class="username">${data.username}</div>
+            <div class="message">${data.message}</div>
+            <div class="timestamp">${timestamp}</div>
+          </div>
+        `;
 
-      chatBox.appendChild(bubble);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    };
+        chatBox.appendChild(bubble);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      };
 
-    function sendMessage() {
-      const input = document.getElementById('messageInput');
-      const message = input.value.trim();
-      if (message) {
-        console.log("📤 Sending message:", message);
-        chatSocket.send(JSON.stringify({ message, username }));
-        input.value = '';
+      function sendMessage() {
+        const input = document.getElementById("messageInput");
+        const message = input.value.trim();
+        if (message) {
+          console.log("📤 Sending message:", message);
+          chatSocket.send(JSON.stringify({ message, username }));
+          input.value = "";
+        }
       }
-    }
-  </script>
-</body>
+    </script>
+  </body>
 </html>

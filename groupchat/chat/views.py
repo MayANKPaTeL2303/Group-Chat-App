@@ -23,8 +23,8 @@ def join_room(request):
         username = request.POST.get('username', '')
         if code in rooms:
             return redirect(f'/chat/{code}/?username={username}')
-        else:
-            return render(request, 'chat/join.html', {'error': 'Invalid Room Code'})
+        # else:
+        return render(request, 'chat/join.html', {'error': 'Invalid Room Code'})
     return render(request, 'chat/join.html')
 
 
