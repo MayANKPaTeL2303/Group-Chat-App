@@ -98,6 +98,8 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+WHITENOISE_USE_FINDERS = True
+
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [ BASE_DIR / "chat" / "static" ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
