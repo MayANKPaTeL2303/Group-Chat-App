@@ -1,58 +1,105 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Group Chat</title>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Group Chat</title>
 
-  <!-- Custom CSS -->
-  <link rel="stylesheet" href="{% static 'chat/css/home.css' %}?v=2">
-</head>
-<body>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'chat/css/home.css' %}?v=2" />
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <h2 class="nav-logo">GroupChat</h2>
+        <ul class="nav-links">
+          <li><a href="{% url 'home' %}">Home</a></li>
+          <li><a href="https://mayankpatel2303.github.io/">View My Site</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+    </nav>
 
-  <!-- Navbar -->
-  <nav class="navbar">
-    <div class="nav-container">
-      <div class="nav-logo">GroupChat</div>
-      <ul class="nav-links">
-        <li><a href="{% url 'home' %}">Home</a></li>
-        <li><a href="https://mayankpatel2303.github.io/">View My Site</a></li>
-        <li><a href="#">Contact</a></li>
-      </ul>
+    <div class="flex-container">
+      <!-- Project Description -->
+      <div class="project-description">
+        <h2 class="section-title text-blue-600">💬 About This Project</h2>
+        <div class="chat-description">
+          <p>
+            <strong>Real-Time Group Chat Application</strong><br />
+            This is a powerful and responsive chat platform developed using the
+            <em>Django web framework</em> along with <em>WebSockets</em> to
+            deliver seamless real-time communication.
+          </p>
+
+          <p>
+            Users can <strong>create</strong> a new chat room or
+            <strong>join</strong> an existing one using a unique room code. Once
+            inside a room, messages are broadcast to all participants
+            <strong>instantly</strong>, without the need for refreshing the
+            page.
+          </p>
+
+          <p>
+            The app uses <strong>Django Channels</strong> to handle asynchronous
+            communication, and <strong>Redis</strong> as a high-performance
+            channel layer to manage routing and message flow. Redis plays a key
+            role in ensuring scalability and responsiveness by serving as an
+            <em>in-memory message broker</em>, efficiently distributing messages
+            across users and processes.
+          </p>
+        </div>
+      </div>
+
+      <!-- Chat Box -->
+      <div class="chat-box">
+        <h1 class="heading">🚀 Group Chat</h1>
+
+        <!-- Create Room -->
+        <div class="section-block">
+          <h2 class="section-title indigo">Create Room</h2>
+          <form
+            method="get"
+            action="{% url 'create_room' %}"
+            class="form-block"
+          >
+            <input
+              type="text"
+              name="username"
+              placeholder="Enter your name"
+              required
+            />
+            <button type="submit" class="create-btn">Create</button>
+          </form>
+        </div>
+
+        <!-- Join Room -->
+        <div class="section-block">
+          <h2 class="section-title green">Join Room</h2>
+          <form method="post" action="{% url 'join_room' %}" class="form-block">
+            {% csrf_token %}
+            <input
+              type="text"
+              name="room_code"
+              placeholder="Room Code"
+              required
+            />
+            <input
+              type="text"
+              name="username"
+              placeholder="Enter your name"
+              required
+            />
+            <button type="submit" class="join-btn">Join</button>
+          </form>
+        </div>
+      </div>
     </div>
-  </nav>
 
-  <div class="container">
-
-    <!-- Main Heading -->
-    <h1 class="heading">🚀 Group Chat</h1>
-
-    <!-- Create Room -->
-    <div class="section-block">
-      <h2 class="section-title indigo">Create Room</h2>
-      <form method="get" action="{% url 'create_room' %}" class="form-block">
-        <input type="text" name="username" placeholder="Enter your name" required>
-        <button type="submit" class="create-btn">Create</button>
-      </form>
-    </div>
-
-    <!-- Join Room -->
-    <div class="section-block">
-      <h2 class="section-title green">Join Room</h2>
-      <form method="post" action="{% url 'join_room' %}" class="form-block">
-        {% csrf_token %}
-        <input type="text" name="room_code" placeholder="Room Code" required>
-        <input type="text" name="username" placeholder="Enter your name" required>
-        <button type="submit" class="join-btn">Join</button>
-      </form>
-    </div>
-
-  </div>
-
-  <!-- Footer -->
-  <footer class="footer">
-    <p>&copy; 2025 GroupChat App | Built by Mayank Patel</p>
-  </footer>
-
-</body>
+    <!-- Footer -->
+    <footer class="footer">
+      <p>&copy; 2025 GroupChat App | Built by Mayank Patel</p>
+    </footer>
+  </body>
 </html>
