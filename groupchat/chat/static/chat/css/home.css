@@ -110,7 +110,7 @@ input[type="text"] {
   padding: 1rem;
   max-width: 1100px;
   margin: 2rem auto;
-  background-color: #f7f0e8		;
+  background-color: #fdf6f0		;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
@@ -121,7 +121,7 @@ input[type="text"] {
   flex: 1;
   min-width: 300px;
   max-width: 40%;
-  background-color: #f0f4ff;
+  background-color: #ffffff;
   padding: 1.5rem;
   border-radius: 0.75rem;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
@@ -140,7 +140,7 @@ input[type="text"] {
 
 .chat-description {
   background-color: #fdf6f0;
-  border: 0px solid #ffa94d;
+  border: 1px solid #ffa94d;
   padding: 15px 15px;
   font-family: 'Segoe UI', sans-serif;
   color: #333;

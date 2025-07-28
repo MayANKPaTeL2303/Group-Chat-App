@@ -11,7 +11,7 @@
   <!-- Header -->
    <nav class="navbar">
     <div class="nav-container">
-      <div class="nav-logo">GroupChat</div>
+      <h2 class="nav-logo">GroupChat</h2>
       <ul class="nav-links">
         <li><a href="{% url 'home' %}">Home</a></li>
         <li><a href="https://github.com/MayANKPaTeL2303">GitHub</a></li>
@@ -33,6 +33,12 @@
         <input id="messageInput" type="text" placeholder="Type your message..." class="chat-input" />
         <button onclick="sendMessage()" class="send-button">Send</button>
       </div>
+
+      <!-- Leave Room Button -->
+      <div class="leave-room-container">
+        <button onclick="leaveRoom()" class="leave-button">Leave Room</button>
+      </div>
+
     </div>
   </main>
 
@@ -75,6 +81,11 @@
         chatSocket.send(JSON.stringify({ message, username }));
         input.value = "";
       }
+    }
+
+    function leaveRoom(){
+      chatSocket.close();
+      window.location.href = "{% url 'home' %}";
     }
   </script>
 

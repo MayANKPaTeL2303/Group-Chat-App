@@ -1,7 +1,7 @@
 from django.db import models
 
 class Message(models.Model):
-    room_code = models.CharField(max_length=10)
+    room_code = models.CharField(max_length=100)
     username = models.CharField(max_length=100)
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
