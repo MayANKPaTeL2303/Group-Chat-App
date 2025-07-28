@@ -1,68 +1,97 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Room {{ room_code }}</title>
-  <link rel="stylesheet" href="{% static 'chat/css/chatroom.css' %}?v=3">
-</head>
-<body>
-
-  <!-- Header -->
-   <nav class="navbar">
-    <div class="nav-container">
-      <h2 class="nav-logo">GroupChat</h2>
-      <ul class="nav-links">
-        <li><a href="{% url 'home' %}">Home</a></li>
-        <li><a href="https://github.com/MayANKPaTeL2303">GitHub</a></li>
-        <li><a href="#">Contact</a></li>
-      </ul>
-    </div>
-  </nav>
-
-  <!-- Main Chat Section -->
-  <main class="chat-main">
-    <div class="chat-container">
-      <h2 class="chat-header">🚀 Room <span class="room-code">{{ room_code }}</span></h2>
-
-      <div id="chat-box" class="chat-box">
-        <!-- Chat messages appear here -->
+  <head>
+    <meta charset="UTF-8" />
+    <title>Room {{ room_code }}</title>
+    <link rel="stylesheet" href="{% static 'chat/css/chatroom.css' %}?v=3" />
+  </head>
+  <body>
+    <!-- Header -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <h2 class="nav-logo">GroupChat</h2>
+        <ul class="nav-links">
+          <li><a href="{% url 'home' %}">Home</a></li>
+          <li><a href="https://github.com/MayANKPaTeL2303">GitHub</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
       </div>
+    </nav>
 
-      <div class="input-area">
-        <input id="messageInput" type="text" placeholder="Type your message..." class="chat-input" />
-        <button onclick="sendMessage()" class="send-button">Send</button>
+    <!-- Main Chat Section -->
+    <main class="chat-main">
+      <div class="chat-container">
+        <h2 class="chat-header">
+          Room <span class="room-code">{{ room_code }}</span>
+        </h2>
+        <!-- Leave Room Button -->
+            <div class="leave-room-container">
+              <button onclick="leaveRoom()" class="leave-button">
+                Leave Room
+              </button>
+            </div>
+
+        <div class="chat-content-wrapper">
+          <!-- Chat Box -->
+          <div class="chat-box-container">
+            <div id="chat-box" class="chat-box">
+              <!-- Chat messages appear here -->
+            </div>
+
+            <div class="input-area">
+              <input
+                id="messageInput"
+                type="text"
+                placeholder="Type your message..."
+                class="chat-input"
+              />
+              <button onclick="sendMessage()" class="send-button">Send</button>
+            </div>
+
+          </div>
+
+          <!-- Summarize Chat Box -->
+          <div class="summary-box-container">
+            <h3 class="summary-title">🧠 Chat Summary</h3>
+            <div id="summary-content" class="summary-content">
+              <p class="placeholder">
+                Click the button below to summarize this chat.
+              </p>
+            </div>
+            <button onclick="summarizeChat()" class="summary-button">
+              Summarize Chat
+            </button>
+          </div>
+        </div>
       </div>
+    </main>
 
-      <!-- Leave Room Button -->
-      <div class="leave-room-container">
-        <button onclick="leaveRoom()" class="leave-button">Leave Room</button>
-      </div>
+    <!-- WebSocket Script -->
+    <script>
+      const roomCode = "{{ room_code }}";
+      const username = "{{ username }}";
+      const wsUrl =
+        "ws://" + window.location.host + "/ws/chat/" + roomCode + "/";
+      const chatSocket = new WebSocket(wsUrl);
 
-    </div>
-  </main>
+      chatSocket.onopen = () => console.log("✅ WebSocket connected!");
+      chatSocket.onerror = (e) => console.error("❌ WebSocket error:", e);
+      chatSocket.onclose = (e) => console.warn("⚠️ WebSocket closed:", e);
 
-  <!-- WebSocket Script -->
-  <script>
-    const roomCode = "{{ room_code }}";
-    const username = "{{ username }}";
-    const wsUrl = "ws://" + window.location.host + "/ws/chat/" + roomCode + "/";
-    const chatSocket = new WebSocket(wsUrl);
+      chatSocket.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        const chatBox = document.getElementById("chat-box");
+        const timestamp = new Date(data.timestamp).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        const isMine = data.username === username;
 
-    chatSocket.onopen = () => console.log("✅ WebSocket connected!");
-    chatSocket.onerror = (e) => console.error("❌ WebSocket error:", e);
-    chatSocket.onclose = (e) => console.warn("⚠️ WebSocket closed:", e);
+        const bubble = document.createElement("div");
+        bubble.className = `bubble-row ${isMine ? "right" : "left"}`;
 
-    chatSocket.onmessage = (e) => {
-      const data = JSON.parse(e.data);
-      const chatBox = document.getElementById("chat-box");
-      const timestamp = new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const isMine = data.username === username;
-
-      const bubble = document.createElement("div");
-      bubble.className = `bubble-row ${isMine ? "right" : "left"}`;
-
-      bubble.innerHTML = `
+        bubble.innerHTML = `
         <div class="bubble ${isMine ? "mine" : "theirs"}">
           <div class="username">${data.username}</div>
           <div class="message">${data.message}</div>
@@ -70,30 +99,48 @@
         </div>
       `;
 
-      chatBox.appendChild(bubble);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    };
+        chatBox.appendChild(bubble);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      };
 
-    function sendMessage() {
-      const input = document.getElementById("messageInput");
-      const message = input.value.trim();
-      if (message) {
-        chatSocket.send(JSON.stringify({ message, username }));
-        input.value = "";
+      function sendMessage() {
+        const input = document.getElementById("messageInput");
+        const message = input.value.trim();
+        if (message) {
+          chatSocket.send(JSON.stringify({ message, username }));
+          input.value = "";
+        }
       }
-    }
 
-    function leaveRoom(){
-      chatSocket.close();
-      window.location.href = "{% url 'home' %}";
-    }
-  </script>
+      function leaveRoom() {
+        chatSocket.close();
+        window.location.href = "{% url 'home' %}";
+      }
 
+      function summarizeChat() {
+    const roomCode = "{{ room_code }}";  // Ensure this variable is passed from Django context
 
-<!-- Footer -->
-  <footer class="footer">
-    <p>&copy; 2025 GroupChat App | Built by Mayank Patel</p>
-  </footer>
+    // Show loading placeholder
+    document.getElementById("summary-content").innerHTML = "<p class='placeholder'>⏳ Generating summary...</p>";
 
-</body>
+    fetch(`/summarize?room_code=${roomCode}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.summary) {
+          document.getElementById("summary-content").innerHTML = `<p>${data.summary}</p>`;
+        } else if (data.error) {
+          document.getElementById("summary-content").innerHTML = `<p class="error">❌ ${data.error}</p>`;
+        }
+      })
+      .catch(error => {
+        document.getElementById("summary-content").innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+      });
+  }
+    </script>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>&copy; 2025 GroupChat App | Built by Mayank Patel</p>
+    </footer>
+  </body>
 </html>

@@ -1,6 +1,8 @@
 from pathlib import Path
 import os
+from dotenv import load_dotenv
 
+load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -54,6 +56,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'groupchat.wsgi.application'
 
 ASGI_APPLICATION = 'groupchat.asgi.application'
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 CHANNEL_LAYERS = {
     'default': {
