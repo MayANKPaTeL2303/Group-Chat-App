@@ -247,3 +247,27 @@ body {
 .summary-button:hover {
   background-color: #0056b3;
 }
+
+  .user-counts {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 20px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    max-width: 350px;
+  }
+  .user-counts strong {
+    color: #333;
+  }
+  .user-counts ul {
+    margin: 8px 0 0 0;
+    padding-left: 20px;
+  }
+  .user-counts li {
+    color: #007bff;
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+  .user-counts li:last-child {
+    margin-bottom: 0;
+  }

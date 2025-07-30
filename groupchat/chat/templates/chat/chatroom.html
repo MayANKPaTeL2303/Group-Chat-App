@@ -26,11 +26,9 @@
           Room <span class="room-code">{{ room_code }}</span>
         </h2>
         <!-- Leave Room Button -->
-            <div class="leave-room-container">
-              <button onclick="leaveRoom()" class="leave-button">
-                Leave Room
-              </button>
-            </div>
+        <div class="leave-room-container">
+          <button onclick="leaveRoom()" class="leave-button">Leave Room</button>
+        </div>
 
         <div class="chat-content-wrapper">
           <!-- Chat Box -->
@@ -48,12 +46,11 @@
               />
               <button onclick="sendMessage()" class="send-button">Send</button>
             </div>
-
           </div>
 
           <!-- Summarize Chat Box -->
           <div class="summary-box-container">
-            <h3 class="summary-title">🧠 Chat Summary</h3>
+            <h3 class="summary-title">Chat Summary</h3>
             <div id="summary-content" class="summary-content">
               <p class="placeholder">
                 Click the button below to summarize this chat.
@@ -65,6 +62,20 @@
           </div>
         </div>
       </div>
+
+      <!-- User Counts -->
+      <div class="user-counts">
+        <strong>Total users in room:</strong> {{ user_count }}<br />
+        <strong>Online users:</strong> {{ online_users|length }}<br />
+        <strong>Online user list:</strong>
+        <ul>
+          {% for user in online_users %}
+          <li>{{ user }}</li>
+          {% empty %}
+          <li style="color: #888; font-weight: 400">No users online</li>
+          {% endfor %}
+        </ul>
+      </div>
     </main>
 
     <!-- WebSocket Script -->
@@ -75,9 +86,9 @@
         "ws://" + window.location.host + "/ws/chat/" + roomCode + "/";
       const chatSocket = new WebSocket(wsUrl);
 
-      chatSocket.onopen = () => console.log("✅ WebSocket connected!");
-      chatSocket.onerror = (e) => console.error("❌ WebSocket error:", e);
-      chatSocket.onclose = (e) => console.warn("⚠️ WebSocket closed:", e);
+      chatSocket.onopen = () => console.log("WebSocket connected!");
+      chatSocket.onerror = (e) => console.error("WebSocket error:", e);
+      chatSocket.onclose = (e) => console.warn("WebSocket closed:", e);
 
       chatSocket.onmessage = (e) => {
         const data = JSON.parse(e.data);
@@ -118,24 +129,31 @@
       }
 
       function summarizeChat() {
-    const roomCode = "{{ room_code }}";  // Ensure this variable is passed from Django context
+        const roomCode = "{{ room_code }}"; // Ensure this variable is passed from Django context
 
-    // Show loading placeholder
-    document.getElementById("summary-content").innerHTML = "<p class='placeholder'>⏳ Generating summary...</p>";
+        // Show loading placeholder
+        document.getElementById("summary-content").innerHTML =
+          "<p class='placeholder'>⏳ Generating summary...</p>";
 
-    fetch(`/summarize?room_code=${roomCode}`)
-      .then(response => response.json())
-      .then(data => {
-        if (data.summary) {
-          document.getElementById("summary-content").innerHTML = `<p>${data.summary}</p>`;
-        } else if (data.error) {
-          document.getElementById("summary-content").innerHTML = `<p class="error">❌ ${data.error}</p>`;
-        }
-      })
-      .catch(error => {
-        document.getElementById("summary-content").innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
-      });
-  }
+        fetch(`/summarize?room_code=${roomCode}`)
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.summary) {
+              document.getElementById(
+                "summary-content"
+              ).innerHTML = `<p>${data.summary}</p>`;
+            } else if (data.error) {
+              document.getElementById(
+                "summary-content"
+              ).innerHTML = `<p class="error">❌ ${data.error}</p>`;
+            }
+          })
+          .catch((error) => {
+            document.getElementById(
+              "summary-content"
+            ).innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+          });
+      }
     </script>
 
     <!-- Footer -->

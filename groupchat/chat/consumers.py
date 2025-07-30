@@ -1,6 +1,6 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
-from .models import Message
+from .models import Message, Room
 from asgiref.sync import sync_to_async
 from datetime import datetime, timezone
 from urllib.parse import parse_qs
@@ -100,3 +100,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @sync_to_async
     def get_last_messages(self):
         return Message.objects.filter(room_code=self.room_code).order_by('-timestamp')[:20][::-1]
+
+    @sync_to_async
+    def room_exists(self):
+        return Room.objects.filter(code=self.room_code).exists()
