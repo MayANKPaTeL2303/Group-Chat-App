@@ -15,6 +15,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         query_params = parse_qs(query_string)
         self.username = query_params.get('username', ['Anonymous'])[0]
 
+        # Check if room exists
+        if not await self.room_exists():
+            await self.close()
+            return
+
         # Join room group
         await self.channel_layer.group_add(
             self.room_group_name,
@@ -95,11 +100,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @sync_to_async
     def save_message(self, room_code, username, message):
-        return Message.objects.create(room_code=room_code, username=username, content=message)
+        room = Room.objects.get(code=room_code)
+        return Message.objects.create(room=room, username=username, content=message)
 
     @sync_to_async
     def get_last_messages(self):
-        return Message.objects.filter(room_code=self.room_code).order_by('-timestamp')[:20][::-1]
+        return Message.objects.filter(room__code=self.room_code).order_by('-timestamp')[:20][::-1]
 
     @sync_to_async
     def room_exists(self):

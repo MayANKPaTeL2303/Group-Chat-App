@@ -149,7 +149,7 @@ def chat_room(request, room_code):
     return render(request, 'chat/chatroom.html', {
         'room_code': room_code,
         'username': username,
-        'user_count': room.user_count(),
+        'user_count': room.users.count(),
         'online_users': online_users,
     })
 
