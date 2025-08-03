@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: group-chat
+    runtime: python               # ✅ REQUIRED LINE
+    buildCommand: ./build.sh
+    startCommand: daphne -b 0.0.0.0 -p 8000 groupchat.asgi:application
+    envVars:
+      - key: DEBUG
+        value: "false"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: GOOGLE_API_KEY
+        value: your-google-api-key
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: redis
+
+  - type: keyvalue
+    name: redis
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: Allow all IPs
+    plan: free
