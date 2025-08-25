@@ -5,11 +5,11 @@
 [![Redis](https://img.shields.io/badge/Redis-Channel%20Layer-red.svg)](https://redis.io/)
 [![WebSockets](https://img.shields.io/badge/WebSockets-Real%20Time-orange.svg)](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)
 
-A sophisticated real-time group chat web application built with **Django**, **Django Channels**, **WebSockets**, **Redis**, and modern web technologies. This application enables seamless real-time communication with advanced features like AI-powered chat summarization, online user tracking, and responsive design.
+A real-time group chat web application built with **Django**, **Django Channels**, **WebSockets**, **Redis**, and modern web technologies. This application enables seamless real-time communication with advanced features like AI-powered chat summarization, online user tracking, and responsive design.
 
-## 🌟 Features
+## Features
 
-### 🔥 Core Functionality
+### Core Functionality
 - **Real-time messaging** using WebSockets and Django Channels
 - **Room-based chat system** with unique room codes
 - **User authentication** and session management
@@ -18,19 +18,19 @@ A sophisticated real-time group chat web application built with **Django**, **Dj
 - **Chat history** - last 20 messages loaded on join
 - **System notifications** for user join/leave events
 
-### 🤖 AI-Powered Features
+### AI-Powered Features
 - **Chat Summarization** using Google's Generative AI (Gemini)
 - **LangChain integration** for advanced text processing
 - **Intelligent conversation analysis** and insights
 
-### 🎨 User Experience
+### User Experience
 - **Modern, responsive UI** with custom CSS styling
 - **Clean navigation** with branded header
 - **Real-time user presence** indicators
 - **Smooth animations** and transitions
 - **Mobile-friendly design**
 
-## 🏗️ Architecture
+##  Architecture
 
 ### Backend Stack
 - **Django 5.2.4** - Web framework
@@ -50,7 +50,7 @@ A sophisticated real-time group chat web application built with **Django**, **Dj
 - **Google Generative AI** - Chat summarization
 - **LangSmith** - AI observability
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 Group-Chat-Django-Channels/
@@ -79,7 +79,7 @@ Group-Chat-Django-Channels/
 └── README.md                # This file
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Python 3.8+
@@ -150,7 +150,7 @@ Open your browser and navigate to:
 - **Development**: `http://127.0.0.1:8000`
 - **Daphne**: `http://127.0.0.1:8000`
 
-## 🎯 How to Use
+## How to Use
 
 ### Creating a Chat Room
 1. Visit the home page
@@ -169,7 +169,7 @@ Open your browser and navigate to:
 - Use the summarization endpoint: `/summarize/?room_code=YOUR_ROOM_CODE`
 - Get AI-powered insights and summaries of your chat conversations
 
-## 🔧 Configuration
+## Configuration
 
 ### Redis Configuration
 The application uses Redis for:
@@ -202,7 +202,7 @@ To enable AI-powered chat summarization:
 2. Add it to your `.env` file as `GOOGLE_API_KEY`
 3. The summarization endpoint will be available at `/summarize/`
 
-## 🛠️ Development
+## Development
 
 ### Key Components
 
@@ -228,7 +228,7 @@ To enable AI-powered chat summarization:
 3. **HTTP endpoints**: Add views and URL patterns
 4. **Frontend**: Update templates and static files
 
-## 📊 Performance & Scalability
+## Performance & Scalability
 
 ### Current Optimizations
 - **Redis channel layer** for efficient message routing
@@ -237,22 +237,7 @@ To enable AI-powered chat summarization:
 - **Message history limiting** (last 20 messages)
 - **User presence caching** with TTL
 
-### Scaling Considerations
-- **Horizontal scaling**: Multiple Daphne workers
-- **Database optimization**: PostgreSQL for production
-- **Redis clustering**: For high-availability setups
-- **Load balancing**: Nginx/Apache reverse proxy
-- **CDN integration**: For static file delivery
-
-## 🔒 Security Features
-
-- **CSRF protection** on all forms
-- **XSS prevention** through Django templates
-- **Secure WebSocket connections** (WSS in production)
-- **Environment variable configuration**
-- **Input validation** and sanitization
-
-## 🚀 Deployment
+## Deployment
 
 ### Production Checklist
 - [ ] Set `DEBUG = False`
@@ -276,7 +261,7 @@ EXPOSE 8000
 CMD ["daphne", "groupchat.asgi:application"]
 ```
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -303,7 +288,7 @@ CMD ["daphne", "groupchat.asgi:application"]
 - `GET /chat/{room_code}/` - Chat room interface
 - `GET /summarize/?room_code={code}` - AI chat summarization
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -314,17 +299,6 @@ redis-cli ping
 # Should return: PONG
 ```
 
-**WebSocket Connection Failed**
-- Ensure Daphne is running (not Django dev server for WebSockets)
-- Check firewall settings
-- Verify Redis is accessible
-
-**Database Errors**
-```bash
-# Reset database
-python manage.py flush
-python manage.py migrate
-```
 
 ## 👨‍💻 Author
 
@@ -332,14 +306,5 @@ python manage.py migrate
 - Website: [mayankpatel2303.github.io](https://mayankpatel2303.github.io/)
 - GitHub: [@MayANKPaTeL2303](https://github.com/MayANKPaTeL2303)
 
-## 🙏 Acknowledgments
-
-- Django and Django Channels communities
-- Redis team for excellent caching solution
-- Google AI for Generative AI capabilities
-- LangChain for AI framework
-- All contributors and testers
-
----
 
 **⭐ If you found this project helpful, please give it a star!*
