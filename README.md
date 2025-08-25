@@ -5,7 +5,7 @@
 [![Redis](https://img.shields.io/badge/Redis-Channel%20Layer-red.svg)](https://redis.io/)
 [![WebSockets](https://img.shields.io/badge/WebSockets-Real%20Time-orange.svg)](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)
 
-A sophisticated real-time group chat web application built with **Django**, **Django Channels**, **WebSockets**, **Redis**, and modern web technologies. This application enables seamless real-time communication with advanced features like AI-powered chat summarization, online user tracking, and responsive design.
+A real-time group chat web application built with **Django**, **Django Channels**, **WebSockets**, **Redis**, and modern web technologies. This application enables seamless real-time communication with advanced features like AI-powered chat summarization, online user tracking, and responsive design.
 
 ## Features
 
