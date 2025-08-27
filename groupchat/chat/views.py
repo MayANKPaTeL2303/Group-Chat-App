@@ -1,18 +1,18 @@
 import random
 import string
 import logging
+import json
 from typing import Dict, List, Optional
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_GET, require_POST
 from django.contrib.auth.models import User
-# from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.cache import cache
 from django.conf import settings
-# from django.utils import timezone
 from django.db import transaction
+from django.core.paginator import Paginator
 from .models import Room, Message
 import time
 
@@ -24,6 +24,8 @@ ONLINE_USER_TIMEOUT = 300  # 5 minutes
 ROOM_CODE_LENGTH = 8
 MAX_ROOM_CODE_ATTEMPTS = 10
 CACHE_TIMEOUT = 300
+ROOMS_PER_PAGE = 10
+
 
 try:
     from langchain_google_genai import ChatGoogleGenerativeAI
@@ -36,8 +38,7 @@ except ImportError:
 
 
 class OnlineUserTracker:
-    """Handles online user tracking with improved error handling and cleanup."""
-    
+    #Handles online user tracking with improved error handling and cleanup.
     @staticmethod
     def _get_cache_key(room_code: str) -> str:
         return f'online_users_{room_code}'
@@ -126,7 +127,7 @@ class RoomManager:
         return None
     
     @staticmethod
-    def create_room_with_user(username: str) -> Optional[Room]:
+    def create_room_with_user(username: str,room_name: str) -> Optional[Room]:
         """Create a new room and add the user to it."""
         try:
             with transaction.atomic():
@@ -134,7 +135,10 @@ class RoomManager:
                 if not code:
                     return None
                 
-                room = Room.objects.create(code=code)
+                room = Room.objects.create(
+                    code=code,
+                    name=room_name if room_name else "Untitled Room"
+                )
                 user, created = User.objects.get_or_create(username=username)
                 room.users.add(user)
                 
@@ -166,8 +170,7 @@ class RoomManager:
 
 
 class ChatSummarizer:
-    """Handles chat summarization using Langchain and Gemini."""
-    
+    # Handles chat summarization using Langchain and Gemini.
     @staticmethod
     def summarize_room_chat(room_code: str) -> Dict:
         """Summarize chat messages for a room."""
@@ -222,25 +225,55 @@ class ChatSummarizer:
 # View Functions
 @require_GET
 def home(request):
-    """Render the home page."""
-    return render(request, 'chat/home.html')
+    """Render the home page with available rooms."""
+    # Get all public rooms with pagination
+    rooms = Room.objects.filter(is_public=True).order_by('-created_at')
+    
+    # Add online user count to each room
+    rooms_with_online = []
+    for room in rooms:
+        online_users = OnlineUserTracker.get_online_users(room.code)
+        rooms_with_online.append({
+            'room': room,
+            'online_count': len(online_users),
+            'online_users': online_users
+        })
+    
+    # Paginate rooms
+    paginator = Paginator(rooms_with_online, ROOMS_PER_PAGE)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+        'total_rooms': rooms.count()
+    }
+    
+    return render(request, 'chat/home.html', context)
 
 
 @require_GET
 def create_room(request):
     """Create a new chat room."""
     username = request.GET.get('username', '').strip()
+    room_name = request.GET.get('room_name', '').strip()
     
     if not username:
         return redirect('home')
     
     # Validate username
-    if len(username) > 150:  # Django's default max_length for username
+    if len(username) > 150: 
         return render(request, 'chat/home.html', {
             'error': 'Username too long'
         })
     
-    room = RoomManager.create_room_with_user(username)
+    # Validate room name
+    if room_name and len(room_name) > 200:
+        return render(request, 'chat/home.html', {
+            'error': 'Room name too long (max 200 characters)'
+        })
+    
+    room = RoomManager.create_room_with_user(username, room_name)
     if not room:
         return render(request, 'chat/home.html', {
             'error': 'Failed to create room. Please try again.'
@@ -251,7 +284,6 @@ def create_room(request):
 
 @require_http_methods(["GET", "POST"])
 def join_room(request):
-    """Join an existing chat room."""
     if request.method == 'GET':
         return render(request, 'chat/join.html')
     
@@ -310,6 +342,7 @@ def chat_room(request, room_code):
     
     context = {
         'room_code': room_code,
+        'room_name': room.get_display_name(),
         'username': username,
         'user_count': room.users.count(),
         'online_users': online_users,
@@ -318,6 +351,33 @@ def chat_room(request, room_code):
     
     return render(request, 'chat/chatroom.html', context)
 
+@require_GET
+def browse_rooms(request):
+    """Browse all available public rooms."""
+    rooms = Room.objects.filter(is_public=True).order_by('-created_at')
+    
+    # Add online user count to each room
+    rooms_with_online = []
+    for room in rooms:
+        online_users = OnlineUserTracker.get_online_users(room.code)
+        rooms_with_online.append({
+            'room': room,
+            'online_count': len(online_users),
+            'online_users': online_users,
+            'message_count': room.messages.count()
+        })
+    
+    # Paginate rooms
+    paginator = Paginator(rooms_with_online, ROOMS_PER_PAGE)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+        'total_rooms': rooms.count()
+    }
+    
+    return render(request, 'chat/browse_rooms.html', context)
 
 @csrf_exempt
 @require_GET
@@ -367,3 +427,16 @@ def get_room_info(request, room_code):
     except Exception as e:
         logger.error(f"Error getting room info for {room_code}: {e}")
         return JsonResponse({'error': 'Failed to get room information'}, status=500)
+    
+
+def _parse_json_request(request) -> tuple:
+    """Helper function to parse JSON request body."""
+    try:
+        data = json.loads(request.body)
+        return data, None
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON decode error: {e}")
+        return None, JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        logger.error(f"Error parsing request body: {e}")
+        return None, JsonResponse({'error': 'Bad request'}, status=400)

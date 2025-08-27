@@ -14,6 +14,12 @@ DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+}
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -22,6 +28,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'channels',
+    'corsheaders',
     'chat',
 ]
 
@@ -33,7 +40,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', 
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware', 
 ]
 
 ROOT_URLCONF = 'groupchat.urls'
@@ -53,11 +61,33 @@ TEMPLATES = [
     },
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # React development server
+    "http://127.0.0.1:3000",
+    "http://localhost:3001",
+]
+
 WSGI_APPLICATION = 'groupchat.wsgi.application'
 
 ASGI_APPLICATION = 'groupchat.asgi.application'
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+CORS_ALLOW_ALL_ORIGINS = False  # Set to True only for development if needed
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 CHANNEL_LAYERS = {
     'default': {

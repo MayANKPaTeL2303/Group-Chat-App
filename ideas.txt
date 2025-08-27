@@ -1,10 +1,6 @@
-Phase 2:
-- Implement: Edit and delete option of the message
+
 
 Phase 3:
-- Implement: View a list of joined/available rooms on side of message
-- List of all active or created rooms
-- User joined/left room Message 
 
 AI Implementation Options:
 - AI Assistant - Auto Respond to the user message based on the history message

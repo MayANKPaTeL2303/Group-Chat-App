@@ -3,29 +3,34 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Room {{ room_code }}</title>
+    <title>{{ room_name }} - GroupChat</title>
     <link rel="stylesheet" href="{% static 'chat/css/chatroom.css' %}?v=3" />
   </head>
   <body>
-    <!-- Header -->
-    <nav class="navbar">
-      <div class="nav-container">
-        <h2 class="nav-logo">GroupChat</h2>
-        <ul class="nav-links">
-          <li><a href="{% url 'home' %}">Home</a></li>
-          <li><a href="https://github.com/MayANKPaTeL2303">GitHub</a></li>
-          <li><a href="#">Contact</a></li>
-        </ul>
-      </div>
-    </nav>
 
     <!-- Main Chat Section -->
     <main class="chat-main">
       <div class="chat-container">
+        <!-- New Room Header -->
+        <div class="room-header">
+          <div class="room-info">
+            <h1 class="room-name">{{ room_name }}</h1>
+            <div class="room-code">{{ room_code }}</div>
+          </div>
+          <div class="room-actions">
+            <div class="room-stats">
+              <strong>{{ user_count }}</strong> members • <strong>{{ online_users|length }}</strong> online
+            </div>
+            <button onclick="leaveRoom()" class="leave-button">Leave Room</button>
+          </div>
+        </div>
+
+        <!-- Old Header (Hidden) -->
         <h2 class="chat-header">
           Room <span class="room-code">{{ room_code }}</span>
         </h2>
-        <!-- Leave Room Button -->
+        
+        <!-- Old Leave Button Container (Hidden) -->
         <div class="leave-room-container">
           <button onclick="leaveRoom()" class="leave-button">Leave Room</button>
         </div>
@@ -50,7 +55,7 @@
 
           <!-- Summarize Chat Box -->
           <div class="summary-box-container">
-            <h3 class="summary-title">`Chat Summary</h3>
+            <h3 class="summary-title">Chat Summary</h3>
             <div id="summary-content" class="summary-content">
               <p class="placeholder">
                 Click the button below to summarize this chat.
@@ -65,10 +70,13 @@
 
       <!-- User Counts -->
       <div class="user-counts">
+        <strong>Room Information:</strong><br />
+        <strong>Name:</strong> {{ room_name }}<br />
+        <strong>Code:</strong> {{ room_code }}<br />
         <strong>Total users in room:</strong> {{ user_count }}<br />
         <strong>Online users:</strong> {{ online_users|length }}<br />
         <strong>Online user list:</strong>
-        <ul>
+        <ul id="onlineUsersList">
           {% for user in online_users %}
           <li>{{ user }}</li>
           {% empty %}
@@ -83,12 +91,25 @@
       const roomCode = "{{ room_code }}";
       const username = "{{ username }}";
       const wsUrl =
-        "ws://" + window.location.host + "/ws/chat/" + roomCode + "/";
+        "ws://" + window.location.host + "/ws/chat/" + roomCode + "/?username=" + encodeURIComponent(username);
       const chatSocket = new WebSocket(wsUrl);
 
-      chatSocket.onopen = () => console.log("WebSocket connected!");
+      chatSocket.onopen = () => {
+        console.log("WebSocket connected!");
+        updateUserActivity();
+      };
+      
       chatSocket.onerror = (e) => console.error("WebSocket error:", e);
-      chatSocket.onclose = (e) => console.warn("WebSocket closed:", e);
+      
+      chatSocket.onclose = (e) => {
+        console.warn("WebSocket closed:", e);
+        // Try to reconnect after 3 seconds
+        setTimeout(() => {
+          if (chatSocket.readyState === WebSocket.CLOSED) {
+            window.location.reload();
+          }
+        }, 3000);
+      };
 
       chatSocket.onmessage = (e) => {
         const data = JSON.parse(e.data);
@@ -98,20 +119,35 @@
           minute: "2-digit",
         });
         const isMine = data.username === username;
+        const isSystem = data.username === 'System';
 
         const bubble = document.createElement("div");
-        bubble.className = `bubble-row ${isMine ? "right" : "left"}`;
+        bubble.className = `bubble-row ${isMine ? "right" : "left"} ${isSystem ? "system" : ""}`;
 
-        bubble.innerHTML = `
-        <div class="bubble ${isMine ? "mine" : "theirs"}">
-          <div class="username">${data.username}</div>
-          <div class="message">${data.message}</div>
-          <div class="timestamp">${timestamp}</div>
-        </div>
-      `;
+        if (isSystem) {
+          bubble.innerHTML = `
+            <div class="bubble system">
+              <div class="message">${data.message}</div>
+              <div class="timestamp">${timestamp}</div>
+            </div>
+          `;
+        } else {
+          bubble.innerHTML = `
+            <div class="bubble ${isMine ? "mine" : "theirs"}">
+              <div class="username">${data.username}</div>
+              <div class="message">${data.message}</div>
+              <div class="timestamp">${timestamp}</div>
+            </div>
+          `;
+        }
 
         chatBox.appendChild(bubble);
         chatBox.scrollTop = chatBox.scrollHeight;
+        
+        // Update online users if it's a join/leave notification
+        if (isSystem && (data.message.includes('joined') || data.message.includes('left'))) {
+          updateOnlineUsers();
+        }
       };
 
       function sendMessage() {
@@ -124,12 +160,14 @@
       }
 
       function leaveRoom() {
-        chatSocket.close();
-        window.location.href = "{% url 'home' %}";
+        if (confirm('Are you sure you want to leave this room?')) {
+          chatSocket.close();
+          window.location.href = "{% url 'home' %}";
+        }
       }
 
       function summarizeChat() {
-        const roomCode = "{{ room_code }}"; // Ensure this variable is passed from Django context
+        const roomCode = "{{ room_code }}";
 
         // Show loading placeholder
         document.getElementById("summary-content").innerHTML =
@@ -145,15 +183,83 @@
             } else if (data.error) {
               document.getElementById(
                 "summary-content"
-              ).innerHTML = `<p class="error">❌ ${data.error}</p>`;
+              ).innerHTML = `<p class="error">${data.error}</p>`;
             }
           })
           .catch((error) => {
             document.getElementById(
               "summary-content"
-            ).innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            ).innerHTML = `<p class="error">Error: ${error.message}</p>`;
           });
       }
+      
+      function updateUserActivity() {
+        fetch('/update-user-activity/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: `room_code=${roomCode}&username=${username}`
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.online_users) {
+            updateOnlineUsersList(data.online_users);
+          }
+        })
+        .catch(error => console.log('Error updating user activity:', error));
+      }
+      
+      function updateOnlineUsers() {
+        fetch(`/room/${roomCode}/info/`)
+          .then(response => response.json())
+          .then(data => {
+            updateOnlineUsersList(data.online_users);
+            // Update the header stats
+            const roomStats = document.querySelector('.room-stats');
+            if (roomStats) {
+              roomStats.innerHTML = `<strong>${data.user_count}</strong> members • <strong>${data.online_count}</strong> online`;
+            }
+          })
+          .catch(error => console.log('Error updating online users:', error));
+      }
+      
+      function updateOnlineUsersList(onlineUsers) {
+        const list = document.getElementById('onlineUsersList');
+        if (list && onlineUsers) {
+          if (onlineUsers.length === 0) {
+            list.innerHTML = '<li style="color: #888; font-weight: 400">No users online</li>';
+          } else {
+            list.innerHTML = onlineUsers.map(user => `<li>${user}</li>`).join('');
+          }
+        }
+      }
+
+      // Enter key to send message
+      document.getElementById("messageInput").addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+          sendMessage();
+        }
+      });
+      
+      // Update user activity periodically
+      setInterval(updateUserActivity, 30000); // Every 30 seconds
+      
+      // Update online users periodically
+      setInterval(updateOnlineUsers, 60000); // Every minute
+      
+      // Focus on input when page loads
+      window.addEventListener('load', function() {
+        document.getElementById("messageInput").focus();
+      });
+      
+      // Handle page visibility changes to update activity
+      document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+          updateUserActivity();
+        }
+      });
     </script>
 
     <!-- Footer -->

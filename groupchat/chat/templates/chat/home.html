@@ -11,20 +11,21 @@
   <body>
     <!-- Navbar -->
     <nav class="navbar">
-      <div class="nav-container">
-        <h2 class="nav-logo">GroupChat</h2>
-        <ul class="nav-links">
-          <li><a href="{% url 'home' %}">Home</a></li>
-          <li><a href="https://mayankpatel2303.github.io/">View My Site</a></li>
-          <li><a href="#">Contact</a></li>
-        </ul>
-      </div>
+        <div class="nav-container">
+            <h2 class="nav-logo">GroupChat</h2>
+            <ul class="nav-links">
+                <li><a href="{% url 'home' %}">Home</a></li>
+                <li><a href="{% url 'browse_rooms' %}">Browse Rooms</a></li>
+                <li><a href="https://github.com/MayANKPaTeL2303">GitHub</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </div>
     </nav>
 
     <div class="flex-container">
       <!-- Project Description -->
       <div class="project-description">
-        <h2 class="section-title text-blue-600">💬 About This Project</h2>
+        <h2 class="section-title text-blue-600">About This Project</h2>
         <div class="chat-description">
           <p>
             <strong>Real-Time Group Chat Application</strong><br />
@@ -54,7 +55,7 @@
 
       <!-- Chat Box -->
       <div class="chat-box">
-        <h1 class="heading">🚀 Group Chat</h1>
+        <h1 class="heading">Group Chat</h1>
 
         <!-- Create Room -->
         <div class="section-block">
@@ -69,8 +70,15 @@
               name="username"
               placeholder="Enter your name"
               required
+              maxlength="150"
             />
-            <button type="submit" class="create-btn">Create</button>
+            <input
+              type="text"
+              name="room_name"
+              placeholder="Room name (optional) - e.g., Study Group, Game Night"
+              maxlength="200"
+            />
+            <button type="submit" class="create-btn">Create Room</button>
           </form>
         </div>
 
@@ -96,6 +104,57 @@
         </div>
       </div>
     </div>
+
+     <!-- Available Rooms Section -->
+    {% if page_obj.object_list %}
+    <section class="rooms-section">
+      <div class="rooms-header">
+        <h2> Active Chat Rooms</h2>
+        <p>Join an ongoing conversation or browse all {{ total_rooms }} available rooms</p>
+      </div>
+      
+      <div class="rooms-grid">
+        {% for room_data in page_obj.object_list|slice:":6" %}
+        <div class="room-card">
+          <div class="room-name" title="{{ room_data.room.get_display_name }}">
+            {{ room_data.room.get_display_name }}
+          </div>
+          <div class="room-code">{{ room_data.room.code }}</div>
+          
+          <div class="room-stats">
+            <div class="stat">
+              <span>👥</span>
+              <span>{{ room_data.room.user_count }} member{{ room_data.room.user_count|pluralize }}</span>
+            </div>
+            <div class="stat">
+              {% if room_data.online_count > 0 %}
+                <span class="online-indicator"></span>
+                <span>{{ room_data.online_count }} online</span>
+              {% else %}
+                <span style="opacity: 0.6;">💤 Quiet</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      
+      {% if total_rooms > 6 %}
+      <div style="text-align: center; margin-top: 30px;">
+        <a href="{% url 'browse_rooms' %}" class="browse-all-btn">
+          View All {{ total_rooms }} Rooms →
+        </a>
+      </div>
+      {% endif %}
+    </section>
+    {% else %}
+    <section class="rooms-section">
+      <div class="no-rooms">
+        <h3>🚀 Be the first to create a room!</h3>
+        <p>No chat rooms available yet. Start a conversation by creating the first room above.</p>
+      </div>
+    </section>
+    {% endif %}
 
     <!-- Footer -->
     <footer class="footer">

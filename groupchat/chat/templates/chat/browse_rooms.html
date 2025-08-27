@@ -1,0 +1,167 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>GroupChat - Home</title>
+    <link rel="stylesheet" href="{% static 'chat/css/home.css' %}?v=3" />
+</head>
+<body>
+    <!-- Header -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <h2 class="nav-logo">GroupChat</h2>
+            <ul class="nav-links">
+                <li><a href="{% url 'home' %}">Home</a></li>
+                <li><a href="{% url 'browse_rooms' %}">Browse Rooms</a></li>
+                <li><a href="https://github.com/MayANKPaTeL2303">GitHub</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="hero-section">
+
+        <!-- Available Rooms Section -->
+        {% if page_obj.object_list %}
+        <section class="rooms-section">
+            <div class="rooms-header">
+                <h2> Available Chat Rooms ({{ total_rooms }} total)</h2>
+                <p>Join an existing conversation or create your own!</p>
+            </div>
+            
+            <div class="rooms-grid">
+                {% for room_data in page_obj.object_list %}
+                <div class="room-card">
+                    <div class="room-name">{{ room_data.room.get_display_name }}</div>
+                    <div class="room-code">{{ room_data.room.code }}</div>
+                    
+                    <div class="room-stats">
+                        <div class="stat">
+                            <span>👥</span>
+                            <span>{{ room_data.room.user_count }} members</span>
+                        </div>
+                        <div class="stat">
+                            <span class="online-indicator"></span>
+                            <span>{{ room_data.online_count }} online</span>
+                        </div>
+                    </div>
+                    
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1">&laquo; First</a>
+                    <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                {% endif %}
+                
+                <span class="current">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}">Next</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </section>
+        {% else %}
+        <section class="rooms-section">
+            <div class="no-rooms">
+                <h3>🚀 Be the first to create a room!</h3>
+                <p>No chat rooms available yet. Start a conversation by creating the first room.</p>
+            </div>
+        </section>
+        {% endif %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 GroupChat App | Built by Mayank Patel</p>
+    </footer>
+
+    <script>
+        function switchTab(tab) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tab + '-tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        function quickJoinRoom(roomCode) {
+            const username = prompt('Enter your name to join the room:');
+            if (username && username.trim()) {
+                const form = document.createElement('form');
+                form.method = 'post';
+                form.action = '{% url "join_room" %}';
+                
+                // Add CSRF token
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrfmiddlewaretoken';
+                csrfInput.value = csrfToken;
+                form.appendChild(csrfInput);
+                
+                // Add username
+                const usernameInput = document.createElement('input');
+                usernameInput.type = 'hidden';
+                usernameInput.name = 'username';
+                usernameInput.value = username.trim();
+                form.appendChild(usernameInput);
+                
+                // Add room code
+                const roomCodeInput = document.createElement('input');
+                roomCodeInput.type = 'hidden';
+                roomCodeInput.name = 'room_code';
+                roomCodeInput.value = roomCode;
+                form.appendChild(roomCodeInput);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+        
+        // Auto-uppercase room code input
+        document.getElementById('room_code').addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase();
+        });
+        
+        // Real-time room updates (optional)
+        function updateRoomStats() {
+            fetch('/api/browse-rooms/')
+                .then(response => response.json())
+                .then(data => {
+                    // Update online counts if needed
+                    data.rooms.forEach(room => {
+                        const roomCard = document.querySelector(`[onclick="quickJoinRoom('${room.code}')"]`).closest('.room-card');
+                        if (roomCard) {
+                            const onlineCount = roomCard.querySelector('.stat:last-child span:last-child');
+                            if (onlineCount) {
+                                onlineCount.textContent = `${room.online_count} online`;
+                            }
+                        }
+                    });
+                })
+                .catch(error => console.log('Error updating room stats:', error));
+        }
+        
+        // Update room stats every 30 seconds
+        setInterval(updateRoomStats, 30000);
+    </script>
+</body>
+</html>
