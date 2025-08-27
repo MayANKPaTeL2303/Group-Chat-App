@@ -20,7 +20,6 @@ A real-time group chat web application built with **Django**, **Django Channels*
 
 ### AI-Powered Features
 - **Chat Summarization** using Google's Generative AI (Gemini)
-- **LangChain integration** for advanced text processing
 - **Intelligent conversation analysis** and insights
 
 ### User Experience
