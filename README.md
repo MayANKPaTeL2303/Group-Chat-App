@@ -1,4 +1,4 @@
-# 💬 Real-Time Group Chat Application
+# Real-Time Group Chat Application
 
 [![Django](https://img.shields.io/badge/Django-5.2.4-green.svg)](https://www.djangoproject.com/)
 [![Channels](https://img.shields.io/badge/Channels-4.3.0-blue.svg)](https://channels.readthedocs.io/)
@@ -132,7 +132,6 @@ docker run -p 6379:6379 -d redis:latest
 
 **Option B: Native Installation**
 - **Windows**: Download from [Redis Windows](https://github.com/microsoftarchive/redis/releases)
-- **macOS**: `brew install redis && brew services start redis`
 - **Linux**: `sudo apt-get install redis-server`
 
 ### 7. Run the Application
@@ -268,7 +267,7 @@ CMD ["daphne", "groupchat.asgi:application"]
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📝 API Documentation
+## API Documentation
 
 ### WebSocket API
 **Connection**: `ws://localhost:8000/ws/chat/{room_code}/?username={username}`
@@ -286,24 +285,6 @@ CMD ["daphne", "groupchat.asgi:application"]
 - `GET /` - Home page
 - `GET /chat/{room_code}/` - Chat room interface
 - `GET /summarize/?room_code={code}` - AI chat summarization
-
-## Troubleshooting
-
-### Common Issues
-
-**Redis Connection Error**
-```bash
-# Check if Redis is running
-redis-cli ping
-# Should return: PONG
-```
-
-
-## 👨‍💻 Author
-
-**Mayank Patel**
-- Website: [mayankpatel2303.github.io](https://mayankpatel2303.github.io/)
-- GitHub: [@MayANKPaTeL2303](https://github.com/MayANKPaTeL2303)
 
 
 **⭐ If you found this project helpful, please give it a star!*
